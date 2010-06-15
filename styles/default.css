@@ -1,0 +1,23 @@
+﻿body 
+{
+    font-family: Segoe UI, Tahoma, Verdana;
+    font-size: small;
+    width: 130px;
+    height:250px;
+    background-color: Transparent;
+}
+#docked
+{
+    width: 120px;
+    height:200px;
+}
+#undocked
+{
+    width: 400px;
+    height:400px;
+}
+#flyout
+{
+    width: 350px;
+    height:550px;
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<gadget>
+  <name>Australian Weather Radar</name>
+  <namespace>gardiner.net.au</namespace>
+  <version>1.1</version>
+  <author name="David Gardiner">
+    <info url="http://davidgardiner.blogspot.com" />
+    <logo src="images/favicon.ico"/>
+  </author>
+  <copyright>&#169; 2007 David Gardiner. Weather images and data &#169; Commonwealth of Australia sourced from the Bureau of Meteorology</copyright>
+  <description>Display the latest weather radar images for locations in Australia. Images are linked to the Australian Bureau of Meteorology</description>
+  <icons>
+    <icon height="64" width="64" src="images/logo64.png" />
+  </icons>
+  <hosts>
+    <host name="sidebar">
+      <base type="HTML" apiVersion="1.0.0" src="gadget.html"/>
+      <permissions>Full</permissions>
+      <platform minPlatformVersion="1.0"/>
+      <defaultImage src="images/drag128.png"/>
+    </host>
+  </hosts>
+</gadget>

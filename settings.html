@@ -1,0 +1,356 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Gadget Template Settings</title>
+    <style type="text/css">
+        body
+        { 
+            margin-left: 2px;
+            margin-top: 2px;
+            width: 300px;
+            height: 320px;
+            font-family: Tahoma;
+            font-size: 10px;
+        }
+        
+        td, label {
+            font-size: 10px;
+            }
+    </style>
+    <script language="javascript" type="text/javascript" src="script/settings.js"></script>
+
+    <script type="text/javascript">
+        System.Gadget.onSettingsClosing = settingsClosing;
+
+        // make sure field value is a number
+        function ValidateNumber(field)
+        {
+            if (field.value.match(/^\d+$/) == null) {
+            
+                field.focus();
+                field.select();
+            }
+        }
+        
+        // modify the image number depending on which radius we selected
+        function UpdateRadarWithRadius(radarImage)
+        {
+            var obj = document.getElementById("Radius");
+            var radiusValue = obj.options[obj.selectedIndex].value;
+
+            var n = parseInt(radarImage, 10);
+            
+            if (radiusValue == 64)
+                n++;
+            if (radiusValue == 256)
+                n--;
+
+            // make sure we are always 3 digits            
+            var s= n.toString();
+            
+            if (s.length == 2)
+                s = "0" + s;
+
+            return s;            
+        }
+        
+        
+        function GetImageUrl()
+        {
+            var serverName = readSetting("BureauServer");
+
+            var LocationList = document.getElementById("radarLocation");
+
+            var radarImage = LocationList[LocationList.selectedIndex].value;
+            
+            var now = new Date();
+            
+            return "http://" + serverName + "/radar/IDR" + UpdateRadarWithRadius(radarImage) + ".gif?cidx=" + now.getTime();
+        }
+
+        function LoadImage()
+        {
+            var obj = document.getElementById("OriginImage");
+            obj.src = GetImageUrl();
+        }
+        
+        function loadSettings()
+        {
+            // use the System.Gadget.Settings.read() function to read current settings
+            // and set default values;
+            // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/sidebar/sidebar/reference/objects/systemgadgetsettings/read.asp
+            
+            var selectedLocation = readSetting("Location");
+            
+            var obj = document.getElementById("radarLocation");
+            
+            for (var i = 0; i < obj.length; i++) {
+                if (obj.options[i].value == selectedLocation) {
+                    obj.options[i].selected = true;
+                    break;
+                }
+            }
+            
+            var useAnimation = readSetting("Animation");
+            
+            obj = document.getElementById("animate");
+            obj.checked = useAnimation;
+            
+            var AnimationDelay = readSetting("AnimationDelay");
+            
+            obj = document.getElementById("AnimationDelay");
+            obj.value = AnimationDelay;
+
+            LoadImage();
+                                    
+            var TopOffset = readSetting("TopOffset");
+            obj = document.getElementById("TopOffset");
+            obj.value = TopOffset;
+
+            var OriginImage = document.getElementById("OriginImage");
+            
+            OriginImage.style.top = TopOffset + "px";
+            
+            var LeftOffset = readSetting("LeftOffset");
+            obj = document.getElementById("LeftOffset");
+            obj.value = LeftOffset;
+            
+            OriginImage.style.left = LeftOffset + "px";
+            
+            obj = document.getElementById("GadgetHeight");
+            obj.value = readSetting("GadgetHeight");
+
+            // update viewport height
+            var ViewPort = document.getElementById("ViewPort");            
+            ViewPort.style.height = obj.value;
+                        
+            obj = document.getElementById("RetrievalInterval");
+            obj.value = readSetting("RetrievalInterval");
+            
+            var radius = readSetting("Radius");
+            
+            obj = document.getElementById("Radius");
+            
+            for (var i = 0; i < obj.length; i++) {
+                if (obj.options[i].value == radius) {
+                    obj.options[i].selected = true;
+                    break;
+                }
+            }
+        }
+    	
+        function settingsClosing(event)
+        {
+            if (event.closeAction == event.Action.commit)
+            {
+                // use the System.Gadget.Settings.write() function to write settings
+                // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/sidebar/sidebar/reference/objects/systemgadgetsettings/write.asp
+                
+                var obj = document.getElementById("radarLocation");
+                System.Gadget.Settings.writeString("Location", obj.options[obj.selectedIndex].value);
+                
+                obj = document.getElementById("animate");
+                System.Gadget.Settings.writeString("Animation", obj.checked);
+                
+                obj = document.getElementById("AnimationDelay");
+                System.Gadget.Settings.writeString("AnimationDelay", obj.value);
+                
+                var OriginImage = document.getElementById("OriginImage");
+                System.Gadget.Settings.writeString("LeftOffset", OriginImage.offsetLeft);
+                System.Gadget.Settings.writeString("TopOffset", OriginImage.offsetTop);
+
+                obj = document.getElementById("GadgetHeight");
+                System.Gadget.Settings.writeString("GadgetHeight", obj.value);
+
+                obj = document.getElementById("RetrievalInterval");
+                System.Gadget.Settings.writeString("RetrievalInterval", obj.value);
+                
+                obj = document.getElementById("Radius");
+                System.Gadget.Settings.writeString("Radius", obj.options[obj.selectedIndex].value);
+            }
+        }
+
+        function DragMe(obj)
+        {
+            //event.cancelBubble = true;
+            var ViewPort = document.getElementById("ViewPort");
+            
+            // centre of viewport
+            var ViewPortCentreX = ViewPort.clientWidth / 2;
+            var ViewPortCentreY = ViewPort.clientHeight / 2;
+
+            var OriginImage = document.getElementById("OriginImage");
+            
+            var ImageWidth = OriginImage.clientWidth;
+            var ImageHeight = OriginImage.clientHeight;
+            
+            var MouseOffsetX = event.offsetX; // OriginImage.offsetLeft + event.offsetX;
+            var MouseOffsetY = event.offsetY; // OriginImage.offsetTop + event.offsetY;
+                        
+
+            var NewX = (OriginImage.offsetLeft) - (-ViewPortCentreX + MouseOffsetX);
+            var NewY = (OriginImage.offsetTop) - (-ViewPortCentreY + MouseOffsetY);
+
+            document.getElementById("LeftOffset").value =  NewX + " = (" + OriginImage.offsetLeft + ") + (-" + ViewPortCentreX + " + " + MouseOffsetX + ");";
+            document.getElementById("TopOffset").value = NewY + " = (" + OriginImage.offsetTop + ") + (-" + ViewPortCentreY + " + " + MouseOffsetY + ");";
+
+            OriginImage.style.left = NewX;
+            OriginImage.style.top = NewY;
+
+        }
+        
+        function UpdatePreviewHeight()
+        {
+            var ViewPort = document.getElementById("ViewPort");
+            
+            var obj = document.getElementById("GadgetHeight");
+            
+            ViewPort.style.height = obj.value;
+
+        }
+
+    </script>
+
+</head>
+<body onload="loadSettings()">
+    <form>
+    <div>
+        <div style="padding-bottom: 5px;">
+        Radius: <br />
+        <select id="Radius" name="Radius" onchange="LoadImage();">
+            <option value="64" title="Most radars do not have 64km">64 km</option>
+            <option selected="selected" value="128">128 km</option>
+            <option value="256">256 km</option>
+        </select><br />
+
+        Location:<br />
+        <select id="radarLocation" name="radarLocation" onchange="LoadImage();">
+                    
+            <optgroup label="Australian Capital Territory">
+                <option value="403">Canberra</option>
+            </optgroup>
+            <optgroup label="New South Wales">
+                <option value="283">Grafton</option>
+                <option value="533">Moree</option>
+                <option value="043">Newcastle</option>
+                <option value="623">Norfolk Is</option>
+                <option value="033">Sydney</option>
+                <option value="553">Wagga Wagga</option>
+                <option value="493">Yarrawonga</option>
+            </optgroup>
+
+            <optgroup label="Northern Territory">
+                <option value="253">Alice Springs</option>
+                <option value="633">Darwin (Berrimah)</option>
+                <option value="093">Gove</option>
+                <option value="423">Katherine (Tindal)</option>
+                <option value="653">Tennant Creek</option>
+            </optgroup>
+
+            <optgroup label="Queensland">
+                <option value="243">Bowen</option>
+                <option value="663">Brisbane (Mt Stapylton)</option>
+                <option value="503">Brisbane (Marburg)</option>
+                <option value="193">Cairns</option>
+                <option value="233">Gladstone</option>
+                <option value="083">Gympie (Mt Kanigan)</option>
+                <option value="563">Longreach</option>
+                <option value="223">Mackay</option>
+                <option value="363">Mornington Is (Gulf of Carpentaria)</option>
+                <option value="213">Townsville (Mt Stuart)</option>
+                <option value="673">Warrego</option>
+                <option value="183">Weipa</option>
+                <option value="413">Willis Is</option>
+            </optgroup>
+            <optgroup label="South Australia">
+                <option value="463">Adelaide (Sellicks Hill)</option>
+                <option value="643">Adelaide (Buckland Park)</option>
+                <option value="333">Ceduna</option>
+                <option value="143">Mt Gambier</option>
+                <option value="273">Woomera</option>
+            </optgroup>
+            <optgroup label="Tasmania">
+                <option value="373">Hobart</option>
+                <option value="523">NW Tasmania (West Takone)</option>
+            </optgroup>
+            <optgroup label="Victoria">
+                <option value="573">East Sale</option>
+                <option value="023">Melbourne</option>
+                <option value="303">Mildura</option>
+                <option value="493">Yarrawonga</option>
+            </optgroup>
+            <optgroup label="Western Australia">
+                <option value="313">Albany</option>
+                <option value="173">Broome</option>
+                <option value="053">Carnarvon</option>
+                <option value="153">Dampier</option>
+                <option value="323">Esperance</option>
+                <option value="453">Eucla</option>
+                <option value="063">Geraldton</option>
+                <option value="443">Giles</option>
+                <option value="393">Halls Creek</option>
+                <option value="483">Kalgoorlie</option>
+                <option value="293">Learmonth</option>
+                <option value="123">Perth</option>
+                <option value="163">Port Hedland</option>
+                <option value="073">Wyndham</option>
+            </optgroup>            
+        </select>
+        </div>
+        
+        </div>
+
+            <div style="display:none; float: right">
+                Left: <input type="text" id="LeftOffset" name="LeftOffset" /><br />
+                Top: <input type="text" id="TopOffset" name="TopOffset" /><br />
+            </div>
+            
+            <div style="float: right; width: 150px;">
+            
+                <div>
+                <fieldset>
+                    <legend>Animation</legend>
+                    <input type="checkbox" id="animate" name="animate" /> Enabled<br />            
+                    Delay (ms) <input id="AnimationDelay" name="AnimationDelay" maxlength="5" size="5" onblur="ValidateNumber(this)" />
+                </fieldset>
+                
+                </div>
+            
+                <fieldset>
+                    <legend>General</legend>
+                    <table>
+                        <tr>
+                            <td>
+                                <label for="GadgetHeight">
+                                    Docked height:</label>
+                            </td>
+                            <td>
+                                <input type="text" size="3" id="GadgetHeight" onblur="ValidateNumber(this); UpdatePreviewHeight();" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="RetrievalInterval">
+                                    Refresh (ms):</label>
+                            </td>
+                            <td>
+                                <input type="text" size="6" id="RetrievalInterval" onblur="ValidateNumber(this)" />
+                            </td>
+                        </tr>
+                    </table>
+                </fieldset>
+
+                <p>Click on the image to re-centre</p>
+            </div>
+
+        <div id="ViewPort" style="float: left; overflow: hidden; width: 120; height: 230; border-style: inset">
+
+            <div onmouseup="DragMe(this)" style="position: absolute; top: 0px; left: 0px; background-color: Blue; width: 100%; height: 100%; filter:alpha(opacity=25); border: 1px solid red; z-index: 100; cursor: crosshair">            
+            </div>
+            
+            <div style="z-index: 90">
+                <img id="OriginImage" src="" style="position: relative; border-style: none;" />
+            </div>
+        </div>
+    </form>
+</body>
+</html>
