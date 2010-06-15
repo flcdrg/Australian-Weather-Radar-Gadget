@@ -1,0 +1,28 @@
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Gadget Template</title>
+    <link rel="stylesheet" href="styles/default.css" type="text/css" />
+    <script language="javascript" type="text/javascript" src="script/utils.js"></script>
+    <script language="javascript" type="text/javascript" src="script/settings.js"></script>
+    <script language="javascript" type="text/javascript">
+        System.Gadget.settingsUI = "settings.html";
+        System.Gadget.onSettingsClosed = UpdateGadget;
+    </script>
+</head>
+<body onload="init();">
+    <div id="docked">
+        <span>Loading...</span>
+        <span style="position: absolute; left: 0px; top: 0px; color: White; z-index: 1000; font-size: 5pt" id="DockedTitle"></span>
+   
+        <img style="position: relative; z-index: 900" id="DockedImage" alt="Current Weather"  onmouseover="StartAnimation();" onmouseout="FinishAnimation();" />
+        <br/>
+              <!--<input type="button" value="Flyout" onclick="flyout();" />-->
+    </div>
+    <div id="undocked">
+        <span style="position: absolute; left: 0px; top: 0px; color: White; z-index: 1000; font-size: 5pt" id="UndockedTitle"></span>
+   
+        <img style="position: absolute; z-index: 900" id="UndockedImage" alt="Current Weather"  />
+
+    </div>
+</body>
+</html>
